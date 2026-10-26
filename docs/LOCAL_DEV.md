@@ -1,6 +1,6 @@
 # Local Development
 
-The local workflow keeps PostgreSQL in Compose and runs the application from the host with the ignored `dev_run.py`. The launcher uses `TELEGRAM_PROXY` to configure aiogram's HTTP/SOCKS session; the proxy value and bot token remain local.
+The local workflow keeps PostgreSQL in Compose and runs the application from the host. `scripts/dev_run.example.py` is a tracked, placeholder-only launcher example; the owner's `dev_run.py` remains private and local. The example uses `TELEGRAM_PROXY` to configure aiogram's HTTP/SOCKS session; the proxy value and bot token remain local.
 
 | Concern | Local owner workflow (reported) | Production Compose (verified) |
 | --- | --- | --- |
@@ -21,10 +21,10 @@ python -m pip install -r requirements-dev.txt
 cp .env.sample .env
 docker compose up -d db
 docker compose stop bot
-PYTHONPATH=src python dev_run.py
+PYTHONPATH=src python scripts/dev_run.example.py
 ```
 
-در `.env` از bot token جداگانهٔ تست استفاده کن، `TELEGRAM_PROXY` را با آدرس proxy خودت تنظیم کن، و `DATABASE_URL` را به `127.0.0.1:5433` وصل کن؛ hostname `db` فقط داخل شبکهٔ Docker resolve می‌شود. سپس با فرمان‌های بالا فقط PostgreSQL را در Docker بالا بیاور، کانتینر bot را متوقف کن و برنامه را از میزبان اجرا کن. launcher همان app را اجرا می‌کند و migration را هنگام startup انجام می‌دهد. اگر `.env` هنوز placeholderهای `.env.sample` را دارد، پیش از اجرا آن‌ها را با مقادیر local/test جایگزین کن.
+در `.env` از bot token جداگانهٔ تست استفاده کن، `TELEGRAM_PROXY` را با آدرس proxy خودت تنظیم کن، و `DATABASE_URL` را به `127.0.0.1:5433` وصل کن؛ hostname `db` فقط داخل شبکهٔ Docker resolve می‌شود. سپس با فرمان‌های بالا فقط PostgreSQL را در Docker بالا بیاور، کانتینر bot را متوقف کن و برنامه را از میزبان اجرا کن. launcher نمونه همان app را اجرا می‌کند و migration را هنگام startup انجام می‌دهد. اگر `.env` هنوز placeholderهای `.env.sample` را دارد، پیش از اجرا آن‌ها را با مقادیر local/test جایگزین کن.
 
 Before starting, ensure `DATABASE_URL` targets the local Compose database and `POSTGRES_PASSWORD` matches that database. Never use the production bot token locally. Do not run the Compose bot and local launcher simultaneously with the same token; Telegram permits only one long-polling consumer per bot. Do not inspect, commit, or publish the ignored `dev_run.py`.
 
@@ -40,8 +40,8 @@ Committed `src/BOOKzMA/__main__.py` starts Uvicorn without a proxy. The ignored 
 
 ## Local Launcher Boundary
 
-`dev_run.py` only loads `Settings`, creates the aiogram session from the optional `TELEGRAM_PROXY` value, and starts the shared app. It must not contain a literal bot token, duplicate business logic, or be committed.
+The expected boundary for the owner's `dev_run.py` is to load `Settings`, create an aiogram session from the optional `TELEGRAM_PROXY` value, and start the shared app. It should not contain a literal bot token or duplicate business logic, and must remain uncommitted.
 
-Keep the launcher outside Git. If the owner later requests a public example, propose a separate script with placeholders and obtain approval first. Never put real tokens or proxy credentials in a tracked example.
+Keep the owner's `dev_run.py` outside Git. `scripts/dev_run.example.py` is a separate public example and must contain placeholders only; never put real tokens or proxy credentials in it.
 
 برای روال اجباری branch، تست، PR، tag و deploy هر feature، [docs/WORKFLOW.md](WORKFLOW.md) را ببین.
